@@ -39,6 +39,8 @@
 
 void _celt_lpc(opus_val16 *_lpc, const opus_val32 *ac, int p);
 
+#if 0 // If this is required make sure it works on MSVC
+
 void celt_fir(
          const opus_val16 *x,
          const opus_val16 *num,
@@ -52,6 +54,8 @@ void celt_iir(const opus_val32 *x,
          int N,
          int ord,
          opus_val16 *mem);
+
+#endif // 0
 
 int _celt_autocorr(const opus_val16 *x, opus_val32 *ac,
          const opus_val16 *window, int overlap, int lag, int n);

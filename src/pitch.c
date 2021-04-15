@@ -297,9 +297,24 @@ void pitch_search(const opus_val16 *x_lp, opus_val16 *y,
    celt_assert(max_pitch>0);
    lag = len+max_pitch;
 
+#ifdef _MSC_VER // Couldn't build with _malloca :/
+   opus_val16 x_lp4_reserved[240 * 4];
+   opus_val16 y_lp4_reserved[387 * 4];
+   opus_val32 xcorr_reserved[294 * 4];
+   opus_val16 *x_lp4 = ((len >> 2) <= (240 * 4))
+       ? x_lp4_reserved
+       : (opus_val16*)malloc(sizeof(opus_val16) * (len >> 2));
+   opus_val16 *y_lp4 = ((lag >> 2) <= (387 * 4))
+       ? y_lp4_reserved
+       : (opus_val16*)malloc(sizeof(opus_val16) * (lag >> 2));
+   opus_val32 *xcorr = ((max_pitch >> 1) <= (294 * 4))
+       ? xcorr_reserved
+       : (opus_val32*)malloc(sizeof(opus_val32) * (max_pitch >> 1));
+#else // _MSC_VER
    opus_val16 x_lp4[len>>2];
    opus_val16 y_lp4[lag>>2];
    opus_val32 xcorr[max_pitch>>1];
+#endif // _MSC_VER
 
    /* Downsample by 2 again */
    for (j=0;j<len>>2;j++)
@@ -382,6 +397,12 @@ void pitch_search(const opus_val16 *x_lp, opus_val16 *y,
       offset = 0;
    }
    *pitch = 2*best_pitch[0]-offset;
+
+#ifdef _MSC_VER
+   if (x_lp4 != x_lp4_reserved) free(x_lp4);
+   if (y_lp4 != y_lp4_reserved) free(y_lp4);
+   if (xcorr != xcorr_reserved) free(xcorr);
+#endif // _MSC_VER
 }
 
 #ifdef FIXED_POINT
@@ -443,7 +464,16 @@ opus_val16 remove_doubling(opus_val16 *x, int maxperiod, int minperiod,
       *T0_=maxperiod-1;
 
    T = T0 = *T0_;
+
+#ifdef _MSC_VER // Couldn't build with _malloca :/
+   opus_val32 yy_lookup_reserved[385 * 4];
+   opus_val32 *yy_lookup = ((maxperiod + 1) <= 385 * 4)
+       ? yy_lookup_reserved
+       : (opus_val32*)malloc(sizeof(opus_val32) * (maxperiod + 1));
+#else // _MSC_VER
    opus_val32 yy_lookup[maxperiod+1];
+#endif // _MSC_VER
+
    dual_inner_prod(x, x, x-T0, N, &xx, &xy);
    yy_lookup[0] = xx;
    yy=xx;
@@ -522,5 +552,10 @@ opus_val16 remove_doubling(opus_val16 *x, int maxperiod, int minperiod,
 
    if (*T0_<minperiod0)
       *T0_=minperiod0;
+
+#ifdef _MSC_VER
+   if (yy_lookup != yy_lookup_reserved) free(yy_lookup);
+#endif // _MSC_VER
+
    return pg;
 }

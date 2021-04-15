@@ -87,6 +87,7 @@ int          p
 #endif
 }
 
+#if 0 // If this is required make sure it works on MSVC
 
 void celt_fir(
          const opus_val16 *x,
@@ -195,6 +196,8 @@ void celt_iir(const opus_val32 *_x,
 #endif
 }
 
+#endif // 0
+
 int _celt_autocorr(
                    const opus_val16 *x,   /*  in: [0...n-1] samples x   */
                    opus_val32       *ac,  /* out: [0...lag-1] ac values */
@@ -208,7 +211,16 @@ int _celt_autocorr(
    int fastN=n-lag;
    int shift;
    const opus_val16 *xptr;
+
+#ifdef _MSC_VER // Couldn't build with _malloca :/
+   opus_val16 xx_reserved[864 * 4];
+   opus_val16 *xx = (n <= 864 * 4)
+       ? xx_reserved
+       : (opus_val16*)malloc(sizeof(opus_val16) * n);
+#else // _MSC_VER
    opus_val16 xx[n];
+#endif // _MSC_VER
+
    celt_assert(n>0);
    celt_assert(overlap>=0);
    if (overlap == 0)
@@ -274,6 +286,10 @@ int _celt_autocorr(
       shift += shift2;
    }
 #endif
+
+#ifdef _MSC_VER
+   if (xx != xx_reserved) free(xx);
+#endif // _MSC_VER
 
    return shift;
 }
