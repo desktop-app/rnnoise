@@ -92,6 +92,8 @@ endforeach()
 
 target_compile_definitions(rnnoise
 PRIVATE
+    RNNOISE_BUILD
+    DLL_EXPORT
     _USE_MATH_DEFINES
     ${replace_conflicting_names}
 )
