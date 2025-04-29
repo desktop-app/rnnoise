@@ -10,10 +10,8 @@ project(rnnoise
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT rnnoise)
 
 include(cmake/nice_target_sources.cmake)
-include(cmake/init_target.cmake)
 
 add_library(rnnoise)
-init_target(rnnoise)
 
 get_filename_component(rnnoise_loc "." REALPATH)
 
