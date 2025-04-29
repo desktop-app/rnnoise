@@ -47,8 +47,12 @@ remove_target_sources(rnnoise ${rnnoise_loc}/src
     rnn_train.py
 )
 
-nice_target_sources(rnnoise ${rnnoise_loc}
-PRIVATE
+target_sources(rnnoise
+PUBLIC
+FILE_SET HEADERS
+BASE_DIRS
+    include
+FILES
     include/rnnoise.h
 )
 
@@ -92,4 +96,19 @@ target_compile_definitions(rnnoise
 PRIVATE
     _USE_MATH_DEFINES
     ${replace_conflicting_names}
+)
+
+install(
+    TARGETS rnnoise
+    EXPORT rnnoiseConfig
+    FILE_SET HEADERS
+    ARCHIVE
+    LIBRARY
+    RUNTIME
+)
+
+install(
+    EXPORT rnnoiseConfig
+    NAMESPACE rnnoise::
+    DESTINATION lib/cmake/rnnoise
 )
